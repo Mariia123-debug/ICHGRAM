@@ -1,0 +1,518 @@
+.page {
+  display: flex;
+  min-height: 100vh;
+  background: #fafafa;
+  position: relative;
+}
+
+.sidebar {
+  width: 245px;
+  border-right: 1px solid #dbdbdb;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  background: #fff;
+  position: relative;
+  z-index: 30;
+}
+
+.logoLink {
+  display: block;
+  margin-bottom: 40px;
+}
+
+.logoImage {
+  width: 120px;
+  display: block;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #262626;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.link:hover {
+  background: #efefef;
+}
+
+.active {
+  font-weight: 600;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.betaBadge {
+  margin-left: auto;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 6px;
+  border: 1px solid #d0d0d0;
+  border-radius: 999px;
+  color: #666;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.linkButton {
+  width: 100%;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #262626;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.linkButton:hover {
+  background: #efefef;
+}
+
+.activeButton {
+  background: #efefef;
+  font-weight: 600;
+}
+
+.main {
+  flex: 1;
+  padding: 40px 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.searchOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  z-index: 40;
+}
+
+.searchPanel {
+  position: fixed;
+  top: 0;
+  left: 245px;
+  width: 397px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #dbdbdb;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  animation: searchSlideIn 0.22s ease;
+}
+
+.searchPanelHeader {
+  padding: 24px 24px 16px;
+}
+
+.searchPanelTitle {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #262626;
+}
+
+.searchInputWrap {
+  padding: 0 24px 24px;
+  border-bottom: 1px solid #dbdbdb;
+}
+
+.searchInput {
+  width: 100%;
+  height: 40px;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  background: #efefef;
+  padding: 0 16px;
+  font-size: 14px;
+  color: #262626;
+  font-family: inherit;
+}
+
+.searchInput::placeholder {
+  color: #8e8e8e;
+}
+
+.searchPanelBody {
+  padding: 16px 24px 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.searchRecentTitle {
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #262626;
+}
+
+.searchRecentList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.searchRecentItem {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.searchRecentItem:hover {
+  background: transparent;
+}
+
+.searchRecentAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #d9d9d9;
+  flex-shrink: 0;
+}
+
+.searchRecentInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.searchRecentUsername {
+  font-size: 14px;
+  line-height: 1.2;
+  font-weight: 500;
+  color: #262626;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.createModal {
+  width: 100%;
+  max-width: 980px;
+  height: 600px;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.2);
+}
+
+.createHeader {
+  height: 48px;
+  border-bottom: 1px solid #dbdbdb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: #fff;
+}
+
+.createHeaderTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.shareButton {
+  position: absolute;
+  right: 52px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #0095f6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.closeButton {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #262626;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.createContent {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  height: calc(600px - 48px);
+  background: #fff;
+}
+
+.uploadArea {
+  border-right: 1px solid #dbdbdb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  overflow: hidden;
+}
+
+.uploadInner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadIcon {
+  font-size: 46px;
+  color: #8e8e8e;
+  margin-bottom: 12px;
+}
+
+.uploadText {
+  font-size: 18px;
+  color: #262626;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.formSide {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  position: relative;
+}
+
+.authorRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+}
+
+.modalAvatarWrap {
+  width: 32px;
+  height: 32px;
+  padding: 2px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+  flex-shrink: 0;
+}
+
+.modalAvatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 2px solid #fff;
+  background: #f2f2f2;
+}
+
+.modalAvatarPlaceholder {
+  object-fit: contain;
+  padding: 4px;
+}
+
+.modalUsername {
+  font-size: 14px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.captionInput {
+  width: 100%;
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 0 16px 16px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #262626;
+  font-family: inherit;
+}
+
+.captionInput::placeholder {
+  color: #8e8e8e;
+}
+
+.emojiRow {
+  position: relative;
+  padding: 0 16px 12px;
+}
+
+.emojiButton {
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.emojiPicker {
+  position: absolute;
+  bottom: 40px;
+  right: 16px;
+  z-index: 10;
+  width: 260px;
+  max-height: 320px;
+  overflow: hidden;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.counter {
+  padding: 0 16px 16px;
+  text-align: right;
+  font-size: 12px;
+  color: #c7c7c7;
+}
+
+.modalBody {
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.modalText {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+}
+
+.modalSubtext {
+  margin: 0 0 24px;
+  font-size: 14px;
+  color: #737373;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.primaryButton,
+.secondaryButton {
+  min-width: 120px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.primaryButton {
+  background: #0095f6;
+  color: #fff;
+}
+
+.secondaryButton {
+  background: #efefef;
+  color: #262626;
+}
+
+.emojiClose {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: none;
+  background: #fff;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 11;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+@keyframes searchSlideIn {
+  from {
+    transform: translateX(-24px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+
+.searchEmpty {
+  font-size: 14px;
+  color: #8e8e8e;
+  padding: 8px 0;
+}
+
+.searchRecentAvatarImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #d9d9d9;
+}
+
+.searchRecentName {
+  font-size: 12px;
+  color: #8e8e8e;
+  margin-top: 2px;
+}

@@ -1,0 +1,82 @@
+.page {
+  width: 100%;
+  padding: 40px 32px;
+  background: #ffffff;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+}
+
+.block {
+  --tile: clamp(140px, 16vw, 320px);
+
+  display: grid;
+  grid-template-columns: var(--tile) var(--tile) var(--tile);
+  grid-template-rows: var(--tile) var(--tile);
+  gap: 2px;
+}
+
+.blockMirrored .bigCard {
+  order: 2;
+}
+
+.blockMirrored .smallGrid {
+  order: 1;
+}
+
+.bigCard,
+.smallCard {
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  overflow: hidden;
+  cursor: pointer;
+  display: block;
+}
+
+.bigCard {
+  width: var(--tile);
+  height: calc(var(--tile) * 2 + 2px);
+  grid-column: span 1;
+  grid-row: span 2;
+}
+
+.smallGrid {
+  width: calc(var(--tile) * 2 + 2px);
+  height: calc(var(--tile) * 2 + 2px);
+  display: grid;
+  grid-template-columns: var(--tile) var(--tile);
+  grid-template-rows: var(--tile) var(--tile);
+  gap: 2px;
+}
+
+.smallCard {
+  width: var(--tile);
+  height: var(--tile);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.placeholder {
+  background: #f3f3f3;
+  cursor: default;
+}
+
+.placeholder:disabled {
+  opacity: 1;
+}
+
+.state {
+  padding: 40px 32px;
+  font-size: 16px;
+}
