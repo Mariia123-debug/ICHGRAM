@@ -2,6 +2,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 import { axiosClient } from '../../../shared/api/axiosClient';
+import { Footer } from '../../../components/Footer/Footer';
 import styles from './Layout.module.css';
 
 export function Layout({ children }) {
@@ -39,6 +40,19 @@ export function Layout({ children }) {
 
     loadCurrentUser();
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handleOpenCreatePost = () => {
+      setIsSearchOpen(false);
+      setIsCreateModalOpen(true);
+    };
+
+    window.addEventListener('open-create-post', handleOpenCreatePost);
+
+    return () => {
+      window.removeEventListener('open-create-post', handleOpenCreatePost);
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -118,6 +132,11 @@ export function Layout({ children }) {
     setIsSearchOpen((prev) => !prev);
   };
 
+  const openSearchFromFooter = () => {
+    if (isCreateModalOpen) return;
+    setIsSearchOpen(true);
+  };
+
   const closeSearchPanel = () => {
     setIsSearchOpen(false);
     setSearchValue('');
@@ -126,7 +145,7 @@ export function Layout({ children }) {
   };
 
   const avatarSrc = useMemo(() => {
-    if (!currentUser?.avatar) return '/no-avatar.png';
+    if (!currentUser?.avatar) return '/no-avatar.jpg';
 
     if (currentUser.avatar.startsWith('data:image')) {
       return currentUser.avatar;
@@ -185,84 +204,132 @@ export function Layout({ children }) {
           </Link>
 
           <nav className={styles.menu}>
-            <NavLink
-              to="/"
-              className={({ isActive }) =>
-                `${styles.link} ${isActive ? styles.active : ''}`
-              }
-              onClick={closeSearchPanel}
-            >
-              <img src="/icons/home.svg" alt="" className={styles.icon} />
-              <span>Home</span>
-            </NavLink>
+            <div className={styles.menuMain}>
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.active : ''}`
+                }
+                onClick={closeSearchPanel}
+              >
+                {({ isActive }) => (
+                  <>
+                    <img
+                      src={isActive ? '/icons/home-active.svg' : '/icons/home.svg'}
+                      alt=""
+                      className={styles.icon}
+                    />
+                    <span>Home</span>
+                  </>
+                )}
+              </NavLink>
 
-            <button
-              type="button"
-              className={`${styles.linkButton} ${isSearchOpen ? styles.activeButton : ''}`}
-              onClick={toggleSearchPanel}
-            >
-              <img src="/icons/search.svg" alt="" className={styles.icon} />
-              <span>Search</span>
-            </button>
+              <button
+                type="button"
+                className={`${styles.linkButton} ${
+                  isSearchOpen ? styles.activeButton : ''
+                }`}
+                onClick={toggleSearchPanel}
+              >
+                <img
+                  src={
+                    isSearchOpen
+                      ? '/icons/search-active.svg'
+                      : '/icons/search.svg'
+                  }
+                  alt=""
+                  className={styles.icon}
+                />
+                <span>Search</span>
+              </button>
 
-            <NavLink
-              to="/explore"
-              className={({ isActive }) =>
-                `${styles.link} ${isActive ? styles.active : ''}`
-              }
-              onClick={closeSearchPanel}
-            >
-              <img src="/icons/explore.svg" alt="" className={styles.icon} />
-              <span>Explore</span>
-            </NavLink>
+              <NavLink
+                to="/explore"
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.active : ''}`
+                }
+                onClick={closeSearchPanel}
+              >
+                {({ isActive }) => (
+                  <>
+                    <img
+                      src={
+                        isActive
+                          ? '/icons/explore-active.svg'
+                          : '/icons/explore.svg'
+                      }
+                      alt=""
+                      className={styles.icon}
+                    />
+                    <span>Explore</span>
+                  </>
+                )}
+              </NavLink>
 
-            <Link
-              to="/not-existing-page"
-              className={styles.link}
-              onClick={closeSearchPanel}
-            >
-              <img src="/icons/messages.svg" alt="" className={styles.icon} />
-              <span>Messages</span>
-              <span className={styles.betaBadge}>beta</span>
-            </Link>
+              <Link
+                to="/not-existing-page"
+                className={styles.link}
+                onClick={closeSearchPanel}
+              >
+                <img src="/icons/messages.svg" alt="" className={styles.icon} />
+                <span className={styles.linkText}>
+                  Messages
+                  <span className={styles.betaBadge}>beta</span>
+                </span>
+              </Link>
 
-            <Link
-              to="/not-existing-page"
-              className={styles.link}
-              onClick={closeSearchPanel}
-            >
-              <img
-                src="/icons/notifications.svg"
-                alt=""
-                className={styles.icon}
-              />
-              <span>Notifications</span>
-              <span className={styles.betaBadge}>beta</span>
-            </Link>
+              <Link
+                to="/not-existing-page"
+                className={styles.link}
+                onClick={closeSearchPanel}
+              >
+                <img
+                  src="/icons/notifications.svg"
+                  alt=""
+                  className={styles.icon}
+                />
+                <span className={styles.linkText}>
+                  Notifications
+                  <span className={styles.betaBadge}>beta</span>
+                </span>
+              </Link>
 
-            <button
-              type="button"
-              className={styles.linkButton}
-              onClick={openCreateModal}
-            >
-              <img src="/icons/create.svg" alt="" className={styles.icon} />
-              <span>Create</span>
-            </button>
+              <button
+                type="button"
+                className={styles.linkButton}
+                onClick={openCreateModal}
+              >
+                <img src="/icons/create.svg" alt="" className={styles.icon} />
+                <span>Create</span>
+              </button>
+            </div>
 
-            <NavLink
-              to="/profile"
-              className={({ isActive }) =>
-                `${styles.link} ${isActive ? styles.active : ''}`
-              }
-              onClick={closeSearchPanel}
-            >
-              <img src="/icons/profile.svg" alt="" className={styles.icon} />
-              <span>Profile</span>
-            </NavLink>
+            <div className={styles.menuBottom}>
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `${styles.link} ${isActive ? styles.active : ''}`
+                }
+                onClick={closeSearchPanel}
+              >
+                <img
+                  src={avatarSrc}
+                  alt={currentUser?.username || 'Profile'}
+                  className={`${styles.icon} ${styles.profileMiniAvatar}`}
+                />
+                <span>Profile</span>
+              </NavLink>
+            </div>
           </nav>
         </aside>
 
-        <main className={styles.main}>{children}</main>
+        <div className={styles.content}>
+          <main className={styles.main}>{children}</main>
+          <Footer
+            onSearchClick={openSearchFromFooter}
+            onCreateClick={openCreateModal}
+          />
+        </div>
 
         {isSearchOpen && (
           <>
@@ -302,7 +369,7 @@ export function Layout({ children }) {
                         ? user.avatar.startsWith('data:image')
                           ? user.avatar
                           : `data:image/jpeg;base64,${user.avatar}`
-                        : '/no-avatar.png';
+                        : '/no-avatar.jpg';
 
                       return (
                         <Link

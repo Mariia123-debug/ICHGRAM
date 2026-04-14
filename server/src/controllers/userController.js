@@ -5,6 +5,7 @@ import User from '../models/users.js';
 
 const formatUser = (user) => ({
   id: user._id,
+  fullName: user.fullName,
   username: user.username,
   email: user.email,
   avatar: user.avatar,
@@ -17,7 +18,7 @@ const formatUser = (user) => ({
 
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, fullName } = req.body;
 
     if (!username || !email || !password) {
       return res.status(400).json({ message: 'Заполните все поля' });
@@ -34,6 +35,7 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = await User.create({
+      fullName: fullName || '',
       username,
       email,
       password: hashedPassword
@@ -104,7 +106,7 @@ export const getCurrentUser = async (req, res) => {
 
 export const updateCurrentUser = async (req, res) => {
   try {
-    const { username, bio, avatar } = req.body;
+    const { fullName, username, bio, avatar } = req.body;
 
     const user = await User.findById(req.userId);
 
@@ -112,7 +114,19 @@ export const updateCurrentUser = async (req, res) => {
       return res.status(404).json({ message: 'Пользователь не найден' });
     }
 
+    if (fullName !== undefined) {
+      if (typeof fullName !== 'string') {
+        return res.status(400).json({ message: 'fullName должен быть строкой' });
+      }
+
+      user.fullName = fullName.trim();
+    }
+
     if (username !== undefined) {
+      if (typeof username !== 'string') {
+        return res.status(400).json({ message: 'Username должен быть строкой' });
+      }
+
       const trimmedUsername = username.trim();
 
       if (!trimmedUsername) {
@@ -185,6 +199,7 @@ export const searchUsersByUsername = async (req, res) => {
 
     const result = users.map((user) => ({
       id: user._id,
+      fullName: user.fullName,
       username: user.username,
       avatar: user.avatar,
       bio: user.bio,

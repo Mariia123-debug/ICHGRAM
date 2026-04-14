@@ -1,0 +1,27 @@
+import { Link } from 'react-router-dom';
+import styles from './Footer.module.css';
+
+const footerLinks = [
+  { label: 'Home', to: '/' },
+  { label: 'Search', to: '/search' },
+  { label: 'Explore', to: '/explore' },
+  { label: 'Messages', to: '/messages' },
+  { label: 'Notifications', to: '/notifications' },
+  { label: 'Create', to: '/create-post' },
+];
+
+export function Footer() {
+  return (
+    <footer className={styles.footer}>
+      <nav className={styles.nav} aria-label="Footer navigation">
+        {footerLinks.map((link) => (
+          <Link key={link.label} to={link.to} className={styles.link}>
+            {link.label}
+          </Link>
+        ))}
+      </nav>
+
+      <p className={styles.copy}>© 2024 ICHgram</p>
+    </footer>
+  );
+}

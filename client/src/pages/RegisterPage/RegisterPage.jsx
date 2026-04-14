@@ -29,7 +29,12 @@ export function RegisterPage() {
     setLoading(true);
 
     try {
-      await axiosClient.post('/users/login', form);
+      await axiosClient.post('/users/register', {
+        email: form.email,
+        username: form.username,
+        password: form.password,
+      });
+
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.message || 'Register error');

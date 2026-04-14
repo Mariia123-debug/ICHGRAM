@@ -1,12 +1,9 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { axiosClient } from '../../shared/api/axiosClient';
-import { setToken } from '../../shared/lib/token';
 import styles from './AuthPage.module.css';
 
 export function LoginPage() {
-  const navigate = useNavigate();
-
   const [form, setForm] = useState({
     email: '',
     password: '',
@@ -28,11 +25,16 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-     const response = await axiosClient.post('/users/login', form);
-const token = response.data.token;
+      const response = await axiosClient.post('/users/login', form);
+      const { token, user } = response.data;
 
-      setToken(token);
-      navigate('/');
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('currentUser', JSON.stringify(user));
+
+      window.location.href = '/';
     } catch (err) {
       setError(err.response?.data?.message || 'Login error');
     } finally {
@@ -82,8 +84,6 @@ const token = response.data.token;
             <div className={styles.or}>OR</div>
 
             <div className={styles.forgotWrapper}>
-              
-
               <Link to="/not-existing-page" className={styles.forgotLink}>
                 Forgot password?
               </Link>

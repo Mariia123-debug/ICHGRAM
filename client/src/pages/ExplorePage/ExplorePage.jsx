@@ -21,21 +21,14 @@ function chunkPosts(posts, size = 5) {
   return result;
 }
 
-function createPlaceholder(id) {
-  return {
-    _id: id,
-    isPlaceholder: true,
-  };
-}
+function fillToFour(items) {
+  const result = [...items];
 
-function buildSquarePosts(group, rowIndex) {
-  const items = [...group];
-
-  while (items.length < 4) {
-    items.push(createPlaceholder(`placeholder-${rowIndex}-${items.length}`));
+  while (result.length < 4) {
+    result.push(null);
   }
 
-  return items;
+  return result;
 }
 
 export function ExplorePage() {
@@ -54,18 +47,18 @@ export function ExplorePage() {
   const isAuthenticated = Boolean(localStorage.getItem('token'));
 
   useEffect(() => {
-    const loadPosts = async () => {
+    const loadData = async () => {
       try {
-        const res = await axiosClient.get('/posts');
+        const postsRes = await axiosClient.get('/posts');
 
-        const safePosts = Array.isArray(res.data)
-          ? res.data.map((post) => ({
-              ...post,
-              comments: Array.isArray(post.comments)
-                ? post.comments.map(normalizeComment).filter(Boolean)
-                : [],
-            }))
-          : [];
+       const safePosts = Array.isArray(postsRes.data)
+  ? postsRes.data.map((post) => ({
+      ...post,
+      comments: Array.isArray(post.comments)
+        ? post.comments.map(normalizeComment).filter(Boolean)
+        : [],
+    }))
+  : [];
 
         setPosts(safePosts);
 
@@ -76,13 +69,13 @@ export function ExplorePage() {
           setCurrentUser(null);
         }
       } catch (error) {
-        console.log('Failed to load explore posts:', error);
+        console.log('Failed to load explore:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadPosts();
+    loadData();
   }, [isAuthenticated]);
 
   const followingSet = useMemo(() => {
@@ -98,7 +91,7 @@ export function ExplorePage() {
     );
   }, [currentUser]);
 
-  const groupedPosts = useMemo(() => chunkPosts(posts, 5), [posts]);
+  const blocks = useMemo(() => chunkPosts(posts, 5), [posts]);
 
   const syncPostEverywhere = (updatedPost) => {
     setPosts((prevPosts) =>
@@ -112,7 +105,7 @@ export function ExplorePage() {
   };
 
   const openPostModal = (post) => {
-    if (post?.isPlaceholder) return;
+    if (!post) return;
 
     setSelectedPost({
       ...post,
@@ -267,24 +260,12 @@ export function ExplorePage() {
         text,
       });
 
-      if (res?.data) {
-        const serverComment =
-          normalizeComment(res.data.comment) ||
-          normalizeComment(res.data.data) ||
-          normalizeComment(tempComment);
-
-        const currentComments = optimisticPost.comments || [];
-        const replacedComments = currentComments.map((comment) =>
-          comment._id === tempComment._id ? serverComment : comment
-        );
-
+      if (res?.data?.post) {
         const updatedPost = {
-          ...optimisticPost,
-          comments: replacedComments,
-          commentsCount:
-            typeof res.data.commentsCount === 'number'
-              ? res.data.commentsCount
-              : replacedComments.length,
+          ...res.data.post,
+          comments: Array.isArray(res.data.post.comments)
+            ? res.data.post.comments.map(normalizeComment).filter(Boolean)
+            : [],
         };
 
         syncPostEverywhere(updatedPost);
@@ -308,34 +289,39 @@ export function ExplorePage() {
     <>
       <div className={styles.page}>
         <div className={styles.layout}>
-          {groupedPosts.map((group, rowIndex) => {
-            const isMirrored = rowIndex % 2 === 1;
+          {blocks.map((block, blockIndex) => {
+            const isMirrored = blockIndex % 2 === 1;
+            const bigPost = block[0] || null;
+            const smallPosts = fillToFour(block.slice(1, 5));
 
-            if (group.length === 5) {
-              const bigPost = group[0];
-              const smallPosts = group.slice(1);
+            return (
+              <div
+                key={`block-${blockIndex}`}
+                className={`${styles.block} ${isMirrored ? styles.blockMirrored : ''}`}
+              >
+                <div className={styles.bigColumn}>
+                  {bigPost ? (
+                    <button
+                      type="button"
+                      className={styles.bigCard}
+                      onClick={() => openPostModal(bigPost)}
+                    >
+                      <img
+                        src={getImageSrc(bigPost.image)}
+                        alt={bigPost.caption || 'Post'}
+                        className={styles.image}
+                      />
+                    </button>
+                  ) : (
+                    <div className={styles.bigPlaceholder} />
+                  )}
+                </div>
 
-              return (
-                <div
-                  key={`block-${rowIndex}`}
-                  className={`${styles.block} ${isMirrored ? styles.blockMirrored : ''}`}
-                >
-                  <button
-                    type="button"
-                    className={styles.bigCard}
-                    onClick={() => openPostModal(bigPost)}
-                  >
-                    <img
-                      src={getImageSrc(bigPost.image)}
-                      alt={bigPost.caption || 'Post'}
-                      className={styles.image}
-                    />
-                  </button>
-
-                  <div className={styles.smallGrid}>
-                    {smallPosts.map((post) => (
+                <div className={styles.smallGrid}>
+                  {smallPosts.map((post, index) =>
+                    post ? (
                       <button
-                        key={post._id}
+                        key={`${post._id}-${blockIndex}-${index}`}
                         type="button"
                         className={styles.smallCard}
                         onClick={() => openPostModal(post)}
@@ -346,51 +332,13 @@ export function ExplorePage() {
                           className={styles.image}
                         />
                       </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-
-            const squarePosts = buildSquarePosts(group, rowIndex);
-
-            return (
-              <div
-                key={`block-${rowIndex}`}
-                className={`${styles.block} ${isMirrored ? styles.blockMirrored : ''}`}
-              >
-                <button
-                  type="button"
-                  className={`${styles.bigCard} ${styles.placeholder}`}
-                  disabled
-                >
-                  <span className={styles.placeholderLabel}>
-                    А здесь может быть ваш пост
-                  </span>
-                </button>
-
-                <div className={styles.smallGrid}>
-                  {squarePosts.map((post) => (
-                    <button
-                      key={post._id}
-                      type="button"
-                      className={`${styles.smallCard} ${
-                        post.isPlaceholder ? styles.placeholder : ''
-                      }`}
-                      onClick={() => openPostModal(post)}
-                      disabled={post.isPlaceholder}
-                    >
-                      {post.isPlaceholder ? (
-                        <span className={styles.placeholderLabelSmall}>Ваш пост</span>
-                      ) : (
-                        <img
-                          src={getImageSrc(post.image)}
-                          alt={post.caption || 'Post'}
-                          className={styles.image}
-                        />
-                      )}
-                    </button>
-                  ))}
+                    ) : (
+                      <div
+                        key={`empty-${blockIndex}-${index}`}
+                        className={styles.smallPlaceholder}
+                      />
+                    )
+                  )}
                 </div>
               </div>
             );

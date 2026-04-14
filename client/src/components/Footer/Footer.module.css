@@ -1,7 +1,73 @@
 .footer {
-  margin-top: 40px;
-  padding: 20px 0;
-  text-align: center;
-  color: #777;
-  font-size: 14px;
+  width: 100%;
+  padding: 32px 0 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+/* ОСНОВНЫЕ ССЫЛКИ (NavLink) */
+.navItem,
+.navItem:link,
+.navItem:visited,
+.navItem:hover,
+.navItem:active {
+  text-decoration: none;   /* ← убрали подчеркивание */
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 400;
+  color: #8e8e8e;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+/* hover эффект */
+.navItem:hover {
+  color: #262626;
+}
+
+/* активный пункт */
+.active {
+  color: #262626;
+  font-weight: 500;
+}
+
+/* КНОПКИ (Search, Create) */
+.navButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 400;
+  color: #8e8e8e;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+/* hover для кнопок */
+.navButton:hover {
+  color: #262626;
+}
+
+/* копирайт (если используешь) */
+.copy {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 400;
+  color: #8e8e8e;
 }

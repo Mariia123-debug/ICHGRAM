@@ -96,6 +96,35 @@ export const getMyPosts = async (req, res) => {
   }
 };
 
+export const getPostsByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: 'Некорректный id пользователя' });
+    }
+
+    const posts = await Post.find({ author: id })
+      .populate('author', 'username email avatar bio')
+      .populate('likes', 'username email avatar')
+      .populate('comments.author', 'username email avatar')
+      .sort({ createdAt: -1 });
+
+    const postsWithCounts = posts.map((post) => ({
+      ...post.toObject(),
+      likesCount: post.likes.length,
+      commentsCount: post.comments.length
+    }));
+
+    res.status(200).json(postsWithCounts);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Ошибка при получении постов пользователя',
+      error: error.message
+    });
+  }
+};
+
 export const updatePost = async (req, res) => {
   try {
     const { id } = req.params;

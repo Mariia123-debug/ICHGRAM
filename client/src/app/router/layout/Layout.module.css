@@ -28,29 +28,48 @@
 }
 
 .menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.menuMain {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.link {
+.menuBottom {
+  margin-top: 24px;
+  padding-top: 24px;
+}
+
+.link,
+.linkButton {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
   border-radius: 8px;
-  text-decoration: none;
   color: #262626;
   font-size: 16px;
+  text-decoration: none;
   cursor: pointer;
   transition: background 0.2s;
+  text-align: left;
+  border: none;
+  background: transparent;
+  font-family: inherit;
 }
 
-.link:hover {
+.link:hover,
+.linkButton:hover {
   background: #efefef;
 }
 
-.active {
+.active,
+.activeButton {
   font-weight: 600;
 }
 
@@ -60,41 +79,27 @@
   flex-shrink: 0;
 }
 
-.betaBadge {
-  margin-left: auto;
-  font-size: 11px;
-  line-height: 1;
-  padding: 3px 6px;
-  border: 1px solid #d0d0d0;
-  border-radius: 999px;
-  color: #666;
-  text-transform: uppercase;
-  flex-shrink: 0;
-}
-
-.linkButton {
-  width: 100%;
-  border: none;
-  background: transparent;
-  display: flex;
+.linkText {
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  color: #262626;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-  text-align: left;
 }
 
-.linkButton:hover {
-  background: #efefef;
+.betaBadge {
+  margin-left: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: red;
+  line-height: 1;
+  position: relative;
+  top: -6px;
 }
 
-.activeButton {
-  background: #efefef;
-  font-weight: 600;
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .main {
@@ -190,6 +195,7 @@
   gap: 12px;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
 }
 
 .searchRecentItem:hover {
@@ -215,6 +221,27 @@
   line-height: 1.2;
   font-weight: 500;
   color: #262626;
+}
+
+.searchRecentName {
+  font-size: 12px;
+  color: #8e8e8e;
+  margin-top: 2px;
+}
+
+.searchEmpty {
+  font-size: 14px;
+  color: #8e8e8e;
+  padding: 8px 0;
+}
+
+.searchRecentAvatarImage {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #d9d9d9;
 }
 
 .modalOverlay {
@@ -495,24 +522,12 @@
   }
 }
 
-
-.searchEmpty {
-  font-size: 14px;
-  color: #8e8e8e;
-  padding: 8px 0;
-}
-
-.searchRecentAvatarImage {
-  width: 44px;
-  height: 44px;
+.profileMiniAvatar {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  background: #d9d9d9;
-}
-
-.searchRecentName {
-  font-size: 12px;
-  color: #8e8e8e;
-  margin-top: 2px;
+  border: 1px solid #dbdbdb;
+  background: #f2f2f2;
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Footer } from '../../components/Footer/Footer';
+import { useNavigate } from 'react-router-dom';
 import { axiosClient } from '../../shared/api/axiosClient';
 import { PostModal } from '../../shared/ui/PostModal/PostModal';
 import {
@@ -14,6 +14,8 @@ import {
 import styles from './FeedPage.module.css';
 
 export function FeedPage() {
+  const navigate = useNavigate();
+
   const [posts, setPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -71,6 +73,17 @@ export function FeedPage() {
         .filter(Boolean)
     );
   }, [currentUser]);
+
+  const handleOpenProfile = (userId) => {
+    if (!userId) return;
+
+    if (currentUser?._id === userId) {
+      navigate('/profile');
+      return;
+    }
+
+    navigate(`/profile/${userId}`);
+  };
 
   const syncPostEverywhere = (updatedPost) => {
     setPosts((prevPosts) =>
@@ -203,6 +216,24 @@ export function FeedPage() {
     setShowEmojiMenu(false);
   };
 
+  const handleDeletePost = async (postId) => {
+    try {
+      await axiosClient.delete(`/posts/${postId}`);
+
+      setPosts((prev) => prev.filter((post) => post._id !== postId));
+
+      setSelectedPost((prev) => {
+        if (!prev || prev._id !== postId) return prev;
+        return null;
+      });
+
+      setCommentText('');
+      setShowEmojiMenu(false);
+    } catch (error) {
+      console.log('Failed to delete post:', error);
+    }
+  };
+
   const handleSubmitComment = async () => {
     if (!isAuthenticated || !selectedPost || commentLoading) return;
 
@@ -237,24 +268,12 @@ export function FeedPage() {
         text,
       });
 
-      if (res?.data) {
-        const serverComment =
-          normalizeComment(res.data.comment) ||
-          normalizeComment(res.data.data) ||
-          normalizeComment(tempComment);
-
-        const currentComments = optimisticPost.comments || [];
-        const replacedComments = currentComments.map((comment) =>
-          comment._id === tempComment._id ? serverComment : comment
-        );
-
+      if (res?.data?.post) {
         const updatedPost = {
-          ...optimisticPost,
-          comments: replacedComments,
-          commentsCount:
-            typeof res.data.commentsCount === 'number'
-              ? res.data.commentsCount
-              : replacedComments.length,
+          ...res.data.post,
+          comments: Array.isArray(res.data.post.comments)
+            ? res.data.post.comments.map(normalizeComment).filter(Boolean)
+            : [],
         };
 
         syncPostEverywhere(updatedPost);
@@ -271,7 +290,6 @@ export function FeedPage() {
       <div className={styles.page}>
         <div className={styles.feed}>
           <div className={styles.stateText}>Loading posts...</div>
-          <Footer />
         </div>
       </div>
     );
@@ -284,118 +302,129 @@ export function FeedPage() {
           {posts.length === 0 ? (
             <div className={styles.stateText}>No posts yet</div>
           ) : (
-            <div className={styles.postsGrid}>
-              {posts.map((post) => {
-                const author = post.author || {};
-                const authorId = author._id;
-                const isMyPost = currentUser?._id === authorId;
-                const isFollowing = followingSet.has(authorId);
+            <>
+              <div className={styles.postsGrid}>
+                {posts.map((post) => {
+                  const author = post.author || {};
+                  const authorId = author._id;
+                  const isMyPost = currentUser?._id === authorId;
+                  const isFollowing = followingSet.has(authorId);
 
-                const likesCount = getLikesCount(post);
-                const commentsCount = getCommentsCount(post);
-                const liked = isLikedByCurrentUser(post, currentUser?._id);
+                  const likesCount = getLikesCount(post);
+                  const commentsCount = getCommentsCount(post);
+                  const liked = isLikedByCurrentUser(post, currentUser?._id);
 
-                return (
-                  <article key={post._id} className={styles.postCard}>
-                    <div className={styles.postHeader}>
-                      <div className={styles.authorInfo}>
-                        <div className={styles.avatarWrap}>
-                          <img
-                            src={getAvatarSrc(author)}
-                            alt={author.username || 'User'}
-                            className={styles.avatar}
-                          />
-                        </div>
+                  return (
+                    <article key={post._id} className={styles.postCard}>
+                      <div className={styles.postHeader}>
+                        <div className={styles.authorInfo}>
+                          <button
+                            type="button"
+                            className={styles.avatarWrap}
+                            onClick={() => handleOpenProfile(authorId)}
+                          >
+                            <img
+                              src={getAvatarSrc(author)}
+                              alt={author.username || 'User'}
+                              className={styles.avatar}
+                            />
+                          </button>
 
-                        <div className={styles.authorMeta}>
-                          <div className={styles.authorTopLine}>
-                            <span className={styles.username}>
-                              {author.username || 'user'}
-                            </span>
-                            <span className={styles.dot}>•</span>
-                            <span className={styles.time}>
-                              {formatTimeAgo(post.createdAt)}
-                            </span>
+                          <div className={styles.authorMeta}>
+                            <div className={styles.authorTopLine}>
+                              <span className={styles.username}>
+                                {author.username || 'user'}
+                              </span>
+                              <span className={styles.dot}>•</span>
+                              <span className={styles.time}>
+                                {formatTimeAgo(post.createdAt)}
+                              </span>
+                            </div>
                           </div>
                         </div>
+
+                        {isAuthenticated && !isMyPost && authorId && (
+                          <button
+                            type="button"
+                            className={styles.followButton}
+                            onClick={() => handleToggleFollow(authorId)}
+                            disabled={followLoadingId === authorId}
+                          >
+                            {followLoadingId === authorId
+                              ? '...'
+                              : isFollowing
+                                ? 'Following'
+                                : 'Follow'}
+                          </button>
+                        )}
                       </div>
 
-                      {isAuthenticated && !isMyPost && authorId && (
-                        <button
-                          type="button"
-                          className={styles.followButton}
-                          onClick={() => handleToggleFollow(authorId)}
-                          disabled={followLoadingId === authorId}
-                        >
-                          {followLoadingId === authorId
-                            ? '...'
-                            : isFollowing
-                              ? 'Following'
-                              : 'Follow'}
-                        </button>
-                      )}
-                    </div>
+                      <button
+                        type="button"
+                        className={styles.imageButton}
+                        onClick={() => openPostModal(post)}
+                      >
+                        <div className={styles.imageWrap}>
+                          <img
+                            src={getImageSrc(post.image)}
+                            alt={post.caption || 'Post'}
+                            className={styles.postImage}
+                          />
+                        </div>
+                      </button>
 
-                    <button
-                      type="button"
-                      className={styles.imageButton}
-                      onClick={() => openPostModal(post)}
-                    >
-                      <div className={styles.imageWrap}>
-                        <img
-                          src={getImageSrc(post.image)}
-                          alt={post.caption || 'Post'}
-                          className={styles.postImage}
-                        />
+                      <div className={styles.postActions}>
+                        <div className={styles.metricsRow}>
+                          <button
+                            type="button"
+                            className={`${styles.metricButton} ${liked ? styles.metricButtonLiked : ''}`}
+                            onClick={() => handleToggleLike(post._id)}
+                            disabled={!isAuthenticated || likeLoadingId === post._id}
+                          >
+                            <span className={styles.metricIcon}>
+                              {liked ? '♥' : '♡'}
+                            </span>
+                            <span className={styles.metricValue}>{likesCount}</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            className={styles.metricButton}
+                            onClick={() => openPostModal(post)}
+                          >
+                            <span className={styles.metricIcon}>💬</span>
+                            <span className={styles.metricValue}>{commentsCount}</span>
+                          </button>
+                        </div>
                       </div>
-                    </button>
 
-                    <div className={styles.postActions}>
-                      <div className={styles.metricsRow}>
-                        <button
-                          type="button"
-                          className={`${styles.metricButton} ${liked ? styles.metricButtonLiked : ''}`}
-                          onClick={() => handleToggleLike(post._id)}
-                          disabled={!isAuthenticated || likeLoadingId === post._id}
-                        >
-                          <span className={styles.metricIcon}>
-                            {liked ? '♥' : '♡'}
-                          </span>
-                          <span className={styles.metricValue}>{likesCount}</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          className={styles.metricButton}
-                          onClick={() => openPostModal(post)}
-                        >
-                          <span className={styles.metricIcon}>💬</span>
-                          <span className={styles.metricValue}>{commentsCount}</span>
-                        </button>
+                      <div className={styles.captionBlock}>
+                        <span className={styles.captionUsername}>
+                          {author.username || 'user'}
+                        </span>
+                        <span className={styles.captionText}>
+                          {post.caption || 'No caption'}
+                        </span>
                       </div>
-                    </div>
+                    </article>
+                  );
+                })}
+              </div>
 
-                    <div className={styles.captionBlock}>
-                      <span className={styles.captionUsername}>
-                        {author.username || 'user'}
-                      </span>
-                      <span className={styles.captionText}>
-                        {post.caption || 'No caption'}
-                      </span>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+              <div className={styles.endFeed}>
+                <img
+                  src="/end-feed.jpg"
+                  alt="End of feed"
+                  className={styles.endFeedImage}
+                />
+              </div>
+            </>
           )}
-
-          <Footer />
         </div>
       </div>
 
       <PostModal
         post={selectedPost}
-        styles={styles}
         currentUser={currentUser}
         isAuthenticated={isAuthenticated}
         followingSet={followingSet}
@@ -410,6 +439,7 @@ export function FeedPage() {
         onToggleFollow={handleToggleFollow}
         onToggleLike={handleToggleLike}
         onSubmitComment={handleSubmitComment}
+        onDeletePost={handleDeletePost}
       />
     </>
   );

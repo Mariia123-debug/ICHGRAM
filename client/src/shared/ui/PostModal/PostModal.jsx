@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   formatTimeAgo,
   getAvatarSrc,
@@ -7,12 +8,12 @@ import {
   getLikesCount,
   isLikedByCurrentUser,
 } from '../../lib/postHelpers';
+import styles from './PostModal.module.css';
 
 const EMOJIS = ['❤️', '🔥', '😍', '👏', '😂', '🎉', '👍', '🙏'];
 
 export function PostModal({
   post,
-  styles,
   currentUser,
   isAuthenticated,
   followingSet,
@@ -27,12 +28,23 @@ export function PostModal({
   onToggleFollow,
   onToggleLike,
   onSubmitComment,
+  onDeletePost,
 }) {
+  const navigate = useNavigate();
+
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeletingPost, setIsDeletingPost] = useState(false);
+
   useEffect(() => {
     if (!post) return;
 
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
+        if (isDeleteConfirmOpen) {
+          setIsDeleteConfirmOpen(false);
+          return;
+        }
+
         onClose();
       }
     };
@@ -42,11 +54,18 @@ export function PostModal({
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [post, onClose]);
+  }, [post, onClose, isDeleteConfirmOpen]);
 
   if (!post) return null;
 
-  const authorId = post.author?._id;
+  
+const authorId =
+  post.author?._id ||
+  post.author?.id ||
+  post.user?._id ||
+  post.user?.id ||
+  null;
+
   const isMyPost = currentUser?._id === authorId;
   const isFollowing = followingSet?.has(authorId);
   const isLiked = isLikedByCurrentUser(post, currentUser?._id);
@@ -54,6 +73,37 @@ export function PostModal({
   const handleEmojiPick = (emoji) => {
     setCommentText((prev) => `${prev}${emoji}`);
   };
+
+  const handleDeleteClick = () => {
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteConfirmOpen(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!onDeletePost || !post?._id) return;
+
+    try {
+      setIsDeletingPost(true);
+      await onDeletePost(post._id);
+      setIsDeleteConfirmOpen(false);
+      onClose();
+    } catch (error) {
+      console.error('Ошибка удаления поста:', error);
+    } finally {
+      setIsDeletingPost(false);
+    }
+  };
+
+ const handleOpenProfile = () => {
+  if (!authorId) return;
+
+  onClose();
+  navigate(`/profile/${authorId}`);
+};
+
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
@@ -80,13 +130,17 @@ export function PostModal({
         <div className={styles.modalContentSide}>
           <div className={styles.modalHeader}>
             <div className={styles.modalAuthorInfo}>
-              <div className={styles.modalAvatarWrap}>
+              <button
+                type="button"
+                className={styles.modalAvatarWrap}
+                onClick={handleOpenProfile}
+              >
                 <img
                   src={getAvatarSrc(post.author)}
                   alt={post.author?.username || 'User'}
                   className={styles.modalAvatar}
                 />
-              </div>
+              </button>
 
               <div className={styles.modalHeaderMeta}>
                 <div className={styles.modalHeaderTop}>
@@ -108,6 +162,19 @@ export function PostModal({
                           : isFollowing
                             ? 'Following'
                             : 'Подписаться'}
+                      </button>
+                    </>
+                  )}
+
+                  {isAuthenticated && isMyPost && (
+                    <>
+                      <span className={styles.dot}>•</span>
+                      <button
+                        type="button"
+                        className={styles.deletePostButton}
+                        onClick={handleDeleteClick}
+                      >
+                        Удалить пост
                       </button>
                     </>
                   )}
@@ -243,6 +310,54 @@ export function PostModal({
             </button>
           </div>
         </div>
+
+        {isDeleteConfirmOpen && (
+          <div
+            className={styles.confirmOverlay}
+            onClick={(event) => {
+              event.stopPropagation();
+              setIsDeleteConfirmOpen(false);
+            }}
+          >
+            <div
+              className={styles.confirmModal}
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className={styles.confirmHeader}>
+                <button
+                  type="button"
+                  className={styles.confirmClose}
+                  onClick={handleCancelDelete}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className={styles.confirmTitle}>
+                Вы точно хотите удалить пост?
+              </div>
+
+              <div className={styles.confirmActions}>
+                <button
+                  type="button"
+                  className={styles.confirmDeleteButton}
+                  onClick={handleConfirmDelete}
+                  disabled={isDeletingPost}
+                >
+                  {isDeletingPost ? 'Удаление...' : 'Да'}
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.confirmCancelButton}
+                  onClick={handleCancelDelete}
+                >
+                  Нет
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

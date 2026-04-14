@@ -44,7 +44,7 @@ export function formatTimeAgo(dateString) {
 }
 
 export function getAvatarSrc(user) {
-  if (!user?.avatar) return '/no-avatar.png';
+  if (!user?.avatar) return '/no-avatar.jpg';
 
   if (user.avatar.startsWith('data:image')) {
     return user.avatar;
